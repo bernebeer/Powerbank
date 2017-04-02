@@ -1,6 +1,7 @@
 #include "Powerbank.h"
 #include <Wire.h>
 
+// Instantiate Powerbank object, name it anything, in this case 'mypb'
 Powerbank mypb;
 
 unsigned long previousMillis = 0;

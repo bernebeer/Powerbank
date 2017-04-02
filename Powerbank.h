@@ -45,6 +45,6 @@ class Powerbank  {
     byte readReg8(int deviceAddress, int regAddress);
     void writeReg8(int deviceAddress, int regAddress, byte data);
     
-};
+}; // End class constructor in semi-colon...
 
 #endif

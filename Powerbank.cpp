@@ -3,6 +3,7 @@
 #include "Powerbank.h"
 #include <Wire.h>
 
+// Powerbank object
 Powerbank::Powerbank() {
 
 }
