@@ -1,5 +1,7 @@
 /* My comments */
+
 #ifndef powerbank
+
 #define powerbank
 
 #if (ARDUINO >=100)
@@ -33,10 +35,10 @@ class Powerbank  {
     // Methods
     void begin();
     void resetWatchdog();
-    int chargeCurrent();
-    int batteryLevel();
-    float outputCurrent();
-    unsigned long batteryVoltage();
+    int getChargeCurrent();
+    int getBatteryLevel();
+    float getOutputCurrent();
+    unsigned long getBatteryVoltage();
     boolean isCharging();
 
   private:

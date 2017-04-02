@@ -1,3 +1,5 @@
+/* My comments */
+
 #include "Powerbank.h"
 #include <Wire.h>
 
@@ -25,17 +27,17 @@ void Powerbank::resetWatchdog() {
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_WD_CE_SYSVOLT_CONFIG, B01111110);
 }
 
-int Powerbank::chargeCurrent() {
+int Powerbank::getChargeCurrent() {
   byte data = readReg8(BQ25895_ADDRESS, BQ25895_REG_ADC_CHRG_CURRENT);
   return (data * 50);
 }
 
-int Powerbank::batteryLevel() {
+int Powerbank::getBatteryLevel() {
   byte data = readReg8(MAX17043_ADDRESS, MAX17043_REG_SOC);
   return data;
 }
 
-unsigned long Powerbank::batteryVoltage() {
+unsigned long Powerbank::getBatteryVoltage() {
   byte dataMSB = readReg8(MAX17043_ADDRESS, MAX17043_REG_VCELL);
   byte dataLSB = readReg8(MAX17043_ADDRESS, MAX17043_REG_VCELL + 1 );
   unsigned long data = word( dataMSB, dataLSB );
@@ -43,7 +45,7 @@ unsigned long Powerbank::batteryVoltage() {
   return data;
 }
 
-float Powerbank::outputCurrent() {
+float Powerbank::getOutputCurrent() {
   float data = ( 1100.0 / 1024.0 * analogRead(CCPIN) ) / 33000.0 * 100000.0;
   return data;
 }
