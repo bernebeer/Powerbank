@@ -14,6 +14,7 @@ void setup() {
 
 void loop() {
 
+  // Check powerbank 
   unsigned long currentMillis = millis();
   if ( currentMillis - previousMillis >= 1000 ) {
 
@@ -31,7 +32,14 @@ void loop() {
     Serial.print("Output current: \t");
     Serial.print( mypb.outputCurrent(), 0 );
     Serial.println("mA");
-
+    Serial.print("Charging: \t\t");
+    if ( mypb.isCharging() == true ) {
+      Serial.println("Yes");
+    }
+    else {
+      Serial.println("No");
+    }
+    
     Serial.println();
     previousMillis = currentMillis;
     

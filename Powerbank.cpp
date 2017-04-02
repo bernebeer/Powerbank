@@ -2,7 +2,7 @@
 #include <Wire.h>
 
 Powerbank::Powerbank() {
-  // Anything you need when instantiating your object goes here
+
 }
 
 void Powerbank::begin() {
@@ -36,7 +36,7 @@ int Powerbank::batteryLevel() {
 }
 
 unsigned long Powerbank::batteryVoltage() {
-  byte dataMSB = readReg8(MAX17043_ADDRESS, MAX17043_REG_VCELL );
+  byte dataMSB = readReg8(MAX17043_ADDRESS, MAX17043_REG_VCELL);
   byte dataLSB = readReg8(MAX17043_ADDRESS, MAX17043_REG_VCELL + 1 );
   unsigned long data = word( dataMSB, dataLSB );
   data = ( data >> 4 ) * 125 / 100;
@@ -46,6 +46,18 @@ unsigned long Powerbank::batteryVoltage() {
 float Powerbank::outputCurrent() {
   float data = ( 1100.0 / 1024.0 * analogRead(CCPIN) ) / 33000.0 * 100000.0;
   return data;
+}
+
+boolean Powerbank::isCharging() {
+  byte data = readReg8(BQ25895_ADDRESS, BQ25895_REG_VBUS_CHRG_STAT);
+  boolean charging;
+  if ( ( (data & B11100000) >> 5 ) > 0 ) {
+    charging = true;
+  }
+  else {
+    charging = false;
+  }
+  return charging;  
 }
 
 byte Powerbank::readReg8(int deviceAddress, int regAddress) {
