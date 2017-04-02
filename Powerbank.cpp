@@ -7,6 +7,8 @@ Powerbank::Powerbank() {
 
 void Powerbank::begin() {
   Wire.begin();
+  // Set ADC to Internal
+  analogReference(INTERNAL);
   // Reset registers
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_RESET, B10111001);
   // Init ADC, force D+ D- detection
@@ -19,13 +21,31 @@ void Powerbank::begin() {
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_CHRG_CURRENT_CONFIG, B00100010);
 }
 
-void keepAlive() {
-  
+void Powerbank::resetWatchdog() {
+  writeReg8(BQ25895_ADDRESS, BQ25895_REG_WD_CE_SYSVOLT_CONFIG, B01111110);
 }
 
 int Powerbank::chargeCurrent() {
   byte data = readReg8(BQ25895_ADDRESS, BQ25895_REG_ADC_CHRG_CURRENT);
   return (data * 50);
+}
+
+int Powerbank::batteryLevel() {
+  byte data = readReg8(MAX17043_ADDRESS, MAX17043_REG_SOC);
+  return data;
+}
+
+unsigned long Powerbank::batteryVoltage() {
+  byte dataMSB = readReg8(MAX17043_ADDRESS, MAX17043_REG_VCELL );
+  byte dataLSB = readReg8(MAX17043_ADDRESS, MAX17043_REG_VCELL + 1 );
+  unsigned long data = word( dataMSB, dataLSB );
+  data = ( data >> 4 ) * 125 / 100;
+  return data;
+}
+
+float Powerbank::outputCurrent() {
+  float data = ( 1100.0 / 1024.0 * analogRead(CCPIN) ) / 33000.0 * 100000.0;
+  return data;
 }
 
 byte Powerbank::readReg8(int deviceAddress, int regAddress) {
