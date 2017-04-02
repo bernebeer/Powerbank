@@ -26,6 +26,7 @@ class Powerbank  {
     Powerbank();
     // Methods
     void begin();
+    void keepAlive();
     int chargeCurrent();
 
   private:    

@@ -16,7 +16,11 @@ void Powerbank::begin() {
   // Disable enter ship mode delay
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01001000);
   // Set fast charge current limit
-  writeReg8(BQ25895, 0x04, B00100010);
+  writeReg8(BQ25895_ADDRESS, BQ25895_REG_CHRG_CURRENT_CONFIG, B00100010);
+}
+
+void keepAlive() {
+  
 }
 
 int Powerbank::chargeCurrent() {
