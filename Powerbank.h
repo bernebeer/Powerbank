@@ -12,6 +12,7 @@
 
 #define CCPIN                             A0
 #define BTNPIN                            3
+#define LEDFETPIN                         A2
 
 #define BQ25895_ADDRESS                   0x6a
 #define MAX17043_ADDRESS                  0x36
@@ -27,6 +28,7 @@
 
 #define MAX17043_REG_VCELL                0x02
 #define MAX17043_REG_SOC                  0x04
+#define MAX17043_REG_MODE                 0x06
 
 class Powerbank  {
   
@@ -34,19 +36,22 @@ class Powerbank  {
     // Constructor
     Powerbank();
     // Methods
-    void begin();
+    void begin(unsigned int chrg_current);
     void resetWatchdog();
     int getChargeCurrent();
     int getBatteryLevel();
     float getOutputCurrent();
     unsigned long getBatteryVoltage();
     boolean isCharging();
-    void sleepPower();
-    void sleepMicro();
+    boolean isBatfetDisabled();
+    void batfetDisable();
+    void batfetEnable();
     boolean btnPressed();
+    void restartFuelGauge();
 
   private:
     byte readReg8(int deviceAddress, int regAddress);
+    void writeReg16(int deviceAddress, int regAddress, word data);
     void writeReg8(int deviceAddress, int regAddress, byte data);
     
 }; // End class constructor in semi-colon...

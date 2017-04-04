@@ -8,9 +8,9 @@ Powerbank::Powerbank() {
 
 }
 
-void Powerbank::begin() {
+void Powerbank::begin(unsigned int chrg_current) {
   Wire.begin();
-  // Set ADC to Internal
+  // Set ADC refrence to Internal
   analogReference(INTERNAL);
   // Reset registers
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_RESET, B10111001);
@@ -21,7 +21,9 @@ void Powerbank::begin() {
   // Disable enter ship mode delay
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01000000);
   // Set fast charge current limit
-  writeReg8(BQ25895_ADDRESS, BQ25895_REG_CHRG_CURRENT_CONFIG, B00100010);
+  byte data = chrg_current / 64;
+  Serial.println(data, DEC);
+  writeReg8(BQ25895_ADDRESS, BQ25895_REG_CHRG_CURRENT_CONFIG, data);
 }
 
 void Powerbank::resetWatchdog() {
@@ -63,23 +65,37 @@ boolean Powerbank::isCharging() {
   return charging;  
 }
 
-void Powerbank::sleepPower() {
-  // writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01100000);
+void Powerbank::batfetDisable() {
+  writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01100000);  
 }
 
-void Powerbank::sleepMicro() {
-  
+boolean Powerbank::isBatfetDisabled() {
+  byte data = readReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG);
+  if ( (data & B00100000) >> 5 ) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+void Powerbank::batfetEnable() {
+  writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01000000);
 }
 
 boolean Powerbank::btnPressed() {
   boolean data;
-  if ( analogRead(BTNPIN) == LOW ) {
+  if ( digitalRead(BTNPIN) == LOW ) {
     data = true;
   }
   else {
     data = false;
   }
   return data;
+}
+
+void Powerbank::restartFuelGauge() {
+  writeReg16(MAX17043_ADDRESS, MAX17043_REG_MODE, 0x4000);
 }
 
 byte Powerbank::readReg8(int deviceAddress, int regAddress) {
@@ -96,6 +112,14 @@ void Powerbank::writeReg8(int deviceAddress, int regAddress, byte data) {
   Wire.beginTransmission(deviceAddress);
   Wire.write(regAddress);
   Wire.write(data);
+  Wire.endTransmission();
+}
+
+void Powerbank::writeReg16(int deviceAddress, int regAddress, word data) {
+  Wire.beginTransmission(deviceAddress);
+  Wire.write(regAddress);
+  Wire.write(highByte(data));
+  Wire.write(lowByte(data));
   Wire.endTransmission();
 }
 

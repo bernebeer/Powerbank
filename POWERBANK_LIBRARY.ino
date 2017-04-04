@@ -1,5 +1,8 @@
 #include "Powerbank.h"
 #include <Wire.h>
+#include <FastLED.h>
+
+#define MAX_CHARGE_CURRENT 300
 
 // Instantiate Powerbank object, name it anything, in this case 'mypb'
 Powerbank mypb;
@@ -9,11 +12,15 @@ unsigned long previousMillis = 0;
 void setup() {
   
   Serial.begin(9600);
-  mypb.begin();
+  mypb.begin(MAX_CHARGE_CURRENT);
+
+  pinMode(LEDFETPIN, OUTPUT);
   
 }
 
 void loop() {
+
+  digitalWrite(LEDFETPIN, HIGH);
 
   // Check powerbank every second
   unsigned long currentMillis = millis();
@@ -35,23 +42,33 @@ void loop() {
     Serial.print("Output current: \t");
     Serial.print( mypb.getOutputCurrent(), 0 );
     Serial.println("mA");
-    Serial.print("Charging: \t\t");
-    if ( mypb.isCharging() == true ) {
+    Serial.print("Batfet disabled: \t");
+    if ( mypb.isBatfetDisabled() ) {
       Serial.println("Yes");
     }
     else {
       Serial.println("No");
     }
-
+    Serial.print("Charging: \t\t");
+    if ( mypb.isCharging() ) {
+      Serial.println("Yes");
+    }
+    else {
+      Serial.println("No");
+    }
+    
     // Print empty line for readability
     Serial.println();
     previousMillis = currentMillis;
     
   }
 
-  if ( mypb.btnPressed() ) {
-    delay(1000);
-    //mypb.sleepPower();
+  if ( mypb.btnPressed() ) {   
+    Serial.println("Button was pressed");
+    mypb.restartFuelGauge();
+    delay(250);
   }
-
+  
 }
+
+
