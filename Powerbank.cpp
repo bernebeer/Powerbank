@@ -19,7 +19,7 @@ void Powerbank::begin() {
   // Set minimum system voltage to 3.7v  
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_WD_CE_SYSVOLT_CONFIG, B01111110);
   // Disable enter ship mode delay
-  writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01001000);
+  writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01000000);
   // Set fast charge current limit
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_CHRG_CURRENT_CONFIG, B00100010);
 }
@@ -61,6 +61,25 @@ boolean Powerbank::isCharging() {
     charging = false;
   }
   return charging;  
+}
+
+void Powerbank::sleepPower() {
+  // writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01100000);
+}
+
+void Powerbank::sleepMicro() {
+  
+}
+
+boolean Powerbank::btnPressed() {
+  boolean data;
+  if ( analogRead(BTNPIN) == LOW ) {
+    data = true;
+  }
+  else {
+    data = false;
+  }
+  return data;
 }
 
 byte Powerbank::readReg8(int deviceAddress, int regAddress) {

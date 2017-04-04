@@ -11,6 +11,7 @@
 #endif
 
 #define CCPIN                             A0
+#define BTNPIN                            3
 
 #define BQ25895_ADDRESS                   0x6a
 #define MAX17043_ADDRESS                  0x36
@@ -40,6 +41,9 @@ class Powerbank  {
     float getOutputCurrent();
     unsigned long getBatteryVoltage();
     boolean isCharging();
+    void sleepPower();
+    void sleepMicro();
+    boolean btnPressed();
 
   private:
     byte readReg8(int deviceAddress, int regAddress);

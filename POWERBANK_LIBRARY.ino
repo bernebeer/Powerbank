@@ -47,6 +47,11 @@ void loop() {
     Serial.println();
     previousMillis = currentMillis;
     
-  } 
+  }
+
+  if ( mypb.btnPressed() ) {
+    delay(1000);
+    //mypb.sleepPower();
+  }
 
 }
