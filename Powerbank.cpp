@@ -8,7 +8,7 @@ Powerbank::Powerbank() {
 
 }
 
-void Powerbank::begin(unsigned int chrg_current) {
+void Powerbank::init(unsigned int fast_chrg_current, unsigned int input_current) {
   Wire.begin();
   // Set ADC refrence to Internal
   analogReference(INTERNAL);
@@ -21,9 +21,17 @@ void Powerbank::begin(unsigned int chrg_current) {
   // Disable enter ship mode delay
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01000000);
   // Set fast charge current limit
-  byte data = chrg_current / 64;
-  Serial.println(data, DEC);
+  byte data = 0;
+  if( fast_chrg_current < 5000 ) {
+    data = fast_chrg_current / 64;
+  }
+  else {
+    data = 1000 / 64;
+  }
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_CHRG_CURRENT_CONFIG, data);
+  // Set input current limit
+  data = B00111111 & ((input_current / 50) - 100);
+  writeReg8(BQ25895_ADDRESS, BQ25895_REG_INP_LIM, data);
 }
 
 void Powerbank::resetWatchdog() {
@@ -38,6 +46,23 @@ int Powerbank::getChargeCurrent() {
 int Powerbank::getBatteryLevel() {
   byte data = readReg8(MAX17043_ADDRESS, MAX17043_REG_SOC);
   return data;
+}
+
+unsigned int Powerbank::getSysVoltage() {
+  byte data = readReg8(BQ25895_ADDRESS, BQ25895_REG_ADC_SYS_VOLT);
+  unsigned int sysVoltage = ((data * 20) + 2304);
+  return sysVoltage;
+}
+
+unsigned int Powerbank::getVbusVoltage() {
+  byte data = readReg8(BQ25895_ADDRESS, BQ25895_REG_ADC_VBUS_VOLT);
+  unsigned int vbusVoltage = ( data & B01111111 ) * 100 + 2600;
+  if ( (data & B10000000) >> 7 ) {
+    return vbusVoltage;
+  }
+  else {
+    return 0;
+  }
 }
 
 unsigned long Powerbank::getBatteryVoltage() {
@@ -91,6 +116,12 @@ boolean Powerbank::btnPressed() {
   else {
     data = false;
   }
+  return data;
+}
+
+byte Powerbank::vbusInputType() {
+  byte data = readReg8(BQ25895_ADDRESS, BQ25895_REG_VBUS_CHRG_STAT);
+  data = (data & B11100000) >> 5;
   return data;
 }
 
