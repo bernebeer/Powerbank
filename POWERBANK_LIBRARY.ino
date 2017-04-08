@@ -81,11 +81,10 @@ void loop() {
   }
 
   if ( mypb.btnPressed() ) {   
-    Serial.println("Button was pressed");
-    mypb.restartFuelGauge();
-    delay(250);
+
+    mypb.sleep();
+    
   }
   
 }
-
 

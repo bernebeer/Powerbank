@@ -51,6 +51,7 @@ class Powerbank  {
     boolean btnPressed();
     void restartFuelGauge();
     byte vbusInputType();
+    void sleep();
     
 
   private:
@@ -59,5 +60,7 @@ class Powerbank  {
     void writeReg8(int deviceAddress, int regAddress, byte data);
     
 }; // End class in semi-colon...
+
+void wake();
 
 #endif

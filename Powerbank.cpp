@@ -2,6 +2,7 @@
 
 #include "Powerbank.h"
 #include <Wire.h>
+#include <avr/sleep.h>
 
 // Powerbank object
 Powerbank::Powerbank() {
@@ -12,6 +13,7 @@ void Powerbank::init(unsigned int fast_chrg_current, unsigned int input_current)
   Wire.begin();
   // Set ADC refrence to Internal
   analogReference(INTERNAL);
+  pinMode(BTNPIN, INPUT);
   // Reset registers
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_RESET, B10111001);
   // Init ADC, force D+ D- detection
@@ -22,7 +24,7 @@ void Powerbank::init(unsigned int fast_chrg_current, unsigned int input_current)
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01000000);
   // Set fast charge current limit
   byte data = 0;
-  if( fast_chrg_current < 5000 ) {
+  if( fast_chrg_current <= 5000 ) {
     data = fast_chrg_current / 64;
   }
   else {
@@ -50,7 +52,7 @@ int Powerbank::getBatteryLevel() {
 
 unsigned int Powerbank::getSysVoltage() {
   byte data = readReg8(BQ25895_ADDRESS, BQ25895_REG_ADC_SYS_VOLT);
-  unsigned int sysVoltage = ((data * 20) + 2304);
+  unsigned int sysVoltage = ( (data & B01111111) * 20 ) + 2304;
   return sysVoltage;
 }
 
@@ -129,6 +131,22 @@ void Powerbank::restartFuelGauge() {
   writeReg16(MAX17043_ADDRESS, MAX17043_REG_MODE, 0x4000);
 }
 
+void Powerbank::sleep() {
+  writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01100000);  
+
+  set_sleep_mode (SLEEP_MODE_PWR_DOWN);  
+  sleep_enable();  
+  noInterrupts ();  
+  attachInterrupt (1, wake, FALLING);
+  EIFR = bit (INTF1); 
+  interrupts ();
+  sleep_cpu ();
+  
+  delay(500);
+  
+  writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01000000);
+}
+
 byte Powerbank::readReg8(int deviceAddress, int regAddress) {
   byte data = 0;
   Wire.beginTransmission(deviceAddress);
@@ -154,5 +172,10 @@ void Powerbank::writeReg16(int deviceAddress, int regAddress, word data) {
   Wire.endTransmission();
 }
 
+void wake()
+{
+  sleep_disable();  
+  detachInterrupt (1);  
+}
 
 
