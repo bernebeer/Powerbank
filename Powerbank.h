@@ -31,6 +31,7 @@
 #define MAX17043_REG_VCELL                0x02
 #define MAX17043_REG_SOC                  0x04
 #define MAX17043_REG_MODE                 0x06
+#define MAX17043_REG_CONFIG               0x0d
 
 class Powerbank  {
   
@@ -51,8 +52,7 @@ class Powerbank  {
     boolean btnPressed();
     void restartFuelGauge();
     byte vbusInputType();
-    void sleep();
-    
+    void sleepBtnWake();    
 
   private:
     byte readReg8(int deviceAddress, int regAddress);

@@ -32,7 +32,8 @@ void Powerbank::init(unsigned int fast_chrg_current, unsigned int input_current)
   }
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_CHRG_CURRENT_CONFIG, data);
   // Set input current limit
-  data = B00111111 & ((input_current / 50) - 100);
+  data = ( ( input_current / 50 ) - 2 );
+  Serial.println(data, BIN);
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_INP_LIM, data);
 }
 
@@ -131,17 +132,30 @@ void Powerbank::restartFuelGauge() {
   writeReg16(MAX17043_ADDRESS, MAX17043_REG_MODE, 0x4000);
 }
 
-void Powerbank::sleep() {
+void Powerbank::sleepBtnWake() {
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01100000);  
+
+  writeReg8(MAX17043_ADDRESS, MAX17043_REG_CONFIG, B10011111);  
+
+  // disable ADC
+  ADCSRA = 0;  
 
   set_sleep_mode (SLEEP_MODE_PWR_DOWN);  
   sleep_enable();  
   noInterrupts ();  
   attachInterrupt (1, wake, FALLING);
-  EIFR = bit (INTF1); 
+  EIFR = bit (INTF1);
+
+  // turn off brown-out enable in software
+  // BODS must be set to one and BODSE must be set to zero within four clock cycles
+  MCUCR = bit (BODS) | bit (BODSE);
+  // The BODS bit is automatically cleared after three clock cycles
+  MCUCR = bit (BODS); 
+
   interrupts ();
   sleep_cpu ();
-  
+
+  // Debounce delay
   delay(500);
   
   writeReg8(BQ25895_ADDRESS, BQ25895_REG_BATFET_CONFIG, B01000000);

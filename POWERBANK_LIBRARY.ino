@@ -1,8 +1,8 @@
 #include "Powerbank.h"
 #include <Wire.h>
 
-#define MAX_FASTCHARGE_CURRENT  1700
-#define MAX_INPUT_CURRENT       3000     
+#define MAX_FASTCHARGE_CURRENT  2000
+#define MAX_INPUT_CURRENT       3000
 
 // Instantiate Powerbank object, name it anything, in this case 'mypb'
 Powerbank mypb;
@@ -80,10 +80,8 @@ void loop() {
     
   }
 
-  if ( mypb.btnPressed() ) {   
-
-    mypb.sleep();
-    
+  if ( mypb.btnPressed() ) {
+    mypb.sleepBtnWake();    
   }
   
 }
